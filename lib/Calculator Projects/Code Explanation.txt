@@ -1,0 +1,161 @@
+1.
+    String input = '';        // Number being typed now
+    String output = '';       // Result shown on screen
+    String operator = '';     // +, -, x, ÷
+    String history = '';      // Shows what's being calculated
+    double num1 = 0;          // First number
+    bool shouldResetInput = false;  // If true, input will be cleared before new typing
+
+2. Helper: Format Output
+ String formatOutput(double value) {
+    if (value == value.toInt()) {
+      return value.toInt().toString();  // Remove .0 from integers
+    } else {
+      return value.toString();
+    }
+  }
+
+  If resultant value is an integer, it will be displayed without decimal places.
+  Otherwise, it will show the full decimal value.
+
+3. Clear Button
+
+    if (value == 'C') {
+    input = '';
+    output = '';
+    operator = '';
+    history = '';
+    num1 = 0;
+    shouldResetInput = false;
+    }
+
+4. Equal Button (Doesn’t calculate, just resets input mode):
+    else if (value == '=') {
+            history = '';
+            shouldResetInput = true;
+    }
+
+5. Operator Pressed:
+     else if (['+', '-', 'x', '÷'].contains(value)) {}
+
+  a) If current operator and input exist, calculate:
+  if (operator.isNotEmpty && input.isNotEmpty) {
+            double num2 = double.tryParse(input) ?? 0;
+            double result = 0;
+
+  b) Perform math based on the operator:
+  if (operator == '+') result = num1 + num2;
+            if (operator == '-') result = num1 - num2;
+            if (operator == 'x') result = num1 * num2;
+            if (operator == '÷') result = num2 != 0 ? num1 / num2 : double.nan;
+
+  c) Store the result, reset input, update history, and set the new operator:
+  output = result.isNaN ? 'Syntax Error' : formatOutput(result);
+            num1 = result;
+            input = '';
+            history = '$output $value';
+            operator = value;
+            return;
+
+  d) If only output is available (and no new input), use output as num1:
+  if (output.isNotEmpty && input.isEmpty) {
+            num1 = double.tryParse(output) ?? 0;
+          } else {
+            num1 = double.tryParse(input) ?? 0;
+            input = '';
+          }
+
+          operator = value;
+          history = '${formatOutput(num1)} $operator';
+          output = formatOutput(num1);
+        }
+
+6. Percentage Button:
+   else if (value == '%') {}
+
+   a) If an operator exists, apply percent logic relative to num1:
+      if (input.isNotEmpty && operator.isNotEmpty) {
+         double percentage = double.tryParse(input) ?? 0;
+             double result = 0;
+
+   b) Modify percentage value based on operator:
+      if (operator == '+' || operator == '-') {
+         percentage = num1 * percentage / 100;
+         }
+         else if (operator == 'x' || operator == '÷') {
+                  percentage = percentage / 100;
+         }
+
+   c) Then show result:
+      input = formatOutput(percentage);
+
+      if (operator == '+') result = num1 + percentage;
+      if (operator == '-') result = num1 - percentage;
+      if (operator == 'x') result = num1 * percentage;
+      if (operator == '÷') result = percentage != 0 ? num1 / percentage : double.nan;
+
+      output = result.isNaN ? 'Syntax Error' : formatOutput(result);
+      history = '${formatOutput(num1)} $operator ${formatOutput(percentage)}';
+      shouldResetInput = true;
+
+   d) If no operator, just divide input by 100:
+       } else if (input.isNotEmpty) {
+           double num = double.tryParse(input) ?? 0;
+           num = num / 100;
+           input = formatOutput(num);
+           output = input;
+           history = input;
+           }
+       }
+
+7. Decimal Point:
+     else if (value == '.') {
+         if (!input.contains('.')) {
+            if (input.isEmpty) {
+               input = '0.';
+             }
+             else {
+               input += '.';
+             }
+           }
+           history = operator.isNotEmpty
+               ? '${formatOutput(num1)} $operator $input'
+               : input;
+
+           output = input;
+         }
+
+8. Digits or Numbers:
+   else {
+         if (shouldResetInput) {
+             input = '';
+             shouldResetInput = false;
+         }
+
+         input += value;
+
+   a) Update history:
+      if (operator.isNotEmpty) {
+          history = '${formatOutput(num1)} $operator $input';
+          }
+          else {
+                history = input;
+          }
+
+   b) Show result preview if operator exists:
+      if (operator.isNotEmpty && input.isNotEmpty) {
+         double num2 = double.tryParse(input) ?? 0;
+         double result = 0;
+         if (operator == '+') result = num1 + num2;
+         if (operator == '-') result = num1 - num2;
+         if (operator == 'x') result = num1 * num2;
+         if (operator == '÷') result = num2 != 0 ? num1 / num2 : double.nan;
+
+         output = result.isNaN ? 'Syntax Error' : formatOutput(result);
+         }
+         else {
+                output = input;
+              }
+            }
+          });
+        }
